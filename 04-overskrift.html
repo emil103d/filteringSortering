@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      img {
+        max-width: 30vw;
+      }
+
+      section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 10px;
+      }
+
+      article {
+        border: 1px solid;
+        border-color: black;
+      }
+
+      nav {
+        display: flex;
+        justify-content: center;
+      }
+
+      button {
+        background-color: pink;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 10px;
+        text-align: center;
+        text-decoration: none;
+        color: black;
+        display: inline-block;
+        font-size: 16px;
+        margin: 10px;
+      }
+
+      .valgt {
+        background-color: white;
+        border-color: pink;
+        border-style: dotted;
+      }
+
+      h1 {
+        font-size: 24px;
+        color: pink;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Alle</h1>
+        <nav>
+          <button data-troende="alle" class="alle">Alle</button>
+          <button data-troende="ja" class="valgt">Troende</button>
+          <button data-troende="nej">Ikke troende</button>
+          <button data-troende="tvivler">Tvivler</button>
+        </nav>
+      </header>
+      <section></section>
+      <template>
+        <article class="persongalleri">
+          <h2></h2>
+          <img src="" alt="" />
+          <p class="email">E-mail:</p>
+          <p class="hobby">Hobby:</p>
+        </article>
+      </template>
+    </main>
+    <script>
+      const url = "https://persongalleri-5d3e.restdb.io/rest/persongalleri";
+      const options = {
+        headers: {
+          "x-apikey": "600fe9211346a1524ff12e31",
+        },
+      };
+      const header = document.querySelector("header h1");
+
+      document.addEventListener("DOMContentLoaded", start);
+      let personer;
+      let filter = "alle";
+
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) =>
+          knap.addEventListener("click", filtrerPersoner)
+        );
+        hentData();
+      }
+
+      function filtrerPersoner() {
+        filter = this.dataset.troende;
+        visPersoner(); //kald funktionen visPersonner efter det nye filter er sat
+        header.textContent = this.textContent; //Når der klikkes på en knap, sørger for eventhandeler-funktionen for, at h1 overskriftens indhold opdateres (this henviser til button der er klikket på)
+        console.log(this);
+      }
+
+      async function hentData() {
+        const respons = await fetch(url, options);
+        // const json = await respons.json();
+        // vis(json);
+        personer = await respons.json();
+        console.log("Personer", personer);
+        visPersoner();
+      }
+
+      function visPersoner() {
+        const container = document.querySelector("section");
+        const persTemplate = document.querySelector("template").content;
+        container.textContent = "";
+        personer.forEach((person) => {
+          console.log("Troende", person.troende);
+          //loop igennem Json personer
+          if (filter == person.troende || filter == "alle") {
+            const klon = persTemplate.cloneNode(true);
+            klon.querySelector("h2").textContent =
+              person.fornavn + " " + person.efternavn;
+            klon.querySelector("img").src = "faces/" + person.billede;
+            klon.querySelector(".email").textContent =
+              "E-mail: " + person.email;
+            klon.querySelector(".hobby").textContent = "Hobby: " + person.hobby;
+            container.appendChild(klon);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
